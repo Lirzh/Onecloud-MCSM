@@ -45,10 +45,13 @@ tar -zxf mcsmanager_armv7l_release.tar.gz
 ##### 运行：
 
 ```
+# 进入你的安装目录
+cd /opt/mcsmanager/
+
 # 安装依赖库
 ./install.sh
 
-# 请使用 Screen 程序打开两个终端窗口（或者其他接管程序）
+# 请使用 Screen 程序打开两个终端窗口（或者其他接管程序，如 pm2）
 
 # 先启动节点程序
 ./start-daemon.sh
