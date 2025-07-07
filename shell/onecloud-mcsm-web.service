@@ -1,0 +1,13 @@
+[Unit]
+Description=Onecloud-MCSM Web Panel
+After=network.target onecloud-mcsm-daemon.service
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/mcsmanager/
+ExecStart=/opt/mcsmanager/start-web.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
