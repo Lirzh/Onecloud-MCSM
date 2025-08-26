@@ -1,4 +1,4 @@
-name: Download MCSManager
+name: Download and Release MCSManager
 
 on:
   schedule:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:  # 允许手动触发
 
 jobs:
-  download:
+  download-and-release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -41,6 +41,28 @@ jobs:
         run: |
           echo "正在压缩 MCSManager..."
           tar -czf mcsmanager_armv7l_release.tar.gz mcsmanager
+          
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: Release v${{ github.run_number }}
+          draft: false
+          prerelease: false
+      
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./mcsmanager_armv7l_release.tar.gz
+          asset_name: mcsmanager_armv7l_release.tar.gz
+          asset_content_type: application/gzip
           
       - name: Commit and push changes
         run: |
