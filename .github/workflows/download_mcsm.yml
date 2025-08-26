@@ -25,10 +25,27 @@ jobs:
           echo "正在解压..."
           tar -zxf mcsmanager_linux_release.tar.gz
           
+      - name: Remove source file
+        run: |
+          echo "正在删除源文件..."
+          rm mcsmanager_linux_release.tar.gz
+          
+      - name: Copy lib files
+        run: |
+          echo "正在复制 lib 文件..."
+          mkdir -p mcsmanager/daemon/lib
+          cp lib/file_zip_linux_arm mcsmanager/daemon/lib/
+          cp lib/pty_linux_arm mcsmanager/daemon/lib/
+          
+      - name: Compress MCSManager
+        run: |
+          echo "正在压缩 MCSManager..."
+          tar -czf mcsmanager_armv7l_release.tar.gz mcsmanager
+          
       - name: Commit and push changes
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add .
-          git commit -m "Auto download and extract MCSManager latest version"
+          git commit -m "Auto download, extract and remove MCSManager source file"
           git push
