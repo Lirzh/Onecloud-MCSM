@@ -1,0 +1,3 @@
+[submodule "MCSM"]
+	path = MCSM
+	url = https://github.com/MCSManager/MCSManager/
