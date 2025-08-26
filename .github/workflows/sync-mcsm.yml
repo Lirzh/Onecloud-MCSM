@@ -1,0 +1,45 @@
+name: Sync MCSManager
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # 每小时执行一次
+  workflow_dispatch:      # 允许手动触发
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          submodules: true
+
+      - name: Sync MCSManager
+        run: |
+          # 创建临时目录用于克隆
+          mkdir -p temp_sync
+          cd temp_sync
+          
+          # 克隆 MCSManager 仓库
+          git clone https://github.com/MCSManager/MCSManager.git MCSM
+          
+          # 删除旧的 MCSM 文件夹（如果存在）
+          rm -rf ../MCSM
+          
+          # 移动新克隆的文件夹
+          mv MCSM ..
+          
+          # 返回上级目录
+          cd ..
+          
+          # 配置 Git 用户信息
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # 提交更改
+          git add .
+          git commit -m "Sync MCSManager to MCSM folder" || echo "No changes to commit"
+          
+          # 推送更改
+          git push
