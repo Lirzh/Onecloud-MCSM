@@ -2,7 +2,7 @@ name: Download and Release MCSManager
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # 每日 UTC 0 点执行
+    - cron: '0 18 * * *'  # 北京时间凌晨2点 = UTC时间18点（UTC+8）
   workflow_dispatch:  # 允许手动触发
 
 jobs:
@@ -10,64 +10,112 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: true
-          token: ${{ secrets.GITHUB_TOKEN }}  # 使用 GITHUB_TOKEN，确保在仓库设置中已启用 workflows 权限
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Install jq
+        run: sudo apt-get install -y jq  # 安装JSON解析工具
       
       - name: Download MCSManager
         run: |
           echo "正在下载 MCSManager 最新 Linux 版本..."
-          wget -O mcsmanager_linux_release.tar.gz https://github.com/MCSManager/MCSManager/releases/latest/download/mcsmanager_linux_release.tar.gz
+          if ! wget -O mcsmanager_linux_release.tar.gz https://github.com/MCSManager/MCSManager/releases/latest/download/mcsmanager_linux_release.tar.gz; then
+            echo "下载失败，终止工作流"
+            exit 1
+          fi
           
       - name: Extract MCSManager
         run: |
           echo "正在解压..."
-          tar -zxf mcsmanager_linux_release.tar.gz
+          if ! tar -zxf mcsmanager_linux_release.tar.gz; then
+            echo "解压失败，终止工作流"
+            exit 1
+          fi
+          
+      - name: Get version from package.json
+        id: get_version
+        run: |
+          # 从package.json提取版本号
+          VERSION=$(jq -r '.version' mcsmanager/daemon/package.json)
+          echo "从package.json提取到的版本号: $VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      
+      - name: Check if release exists
+        id: check_release
+        run: |
+          # 检查该版本号是否已存在对应的release
+          if gh release view "v${{ steps.get_version.outputs.version }}" > /dev/null 2>&1; then
+            echo "版本 v${{ steps.get_version.outputs.version }} 已存在"
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "版本 v${{ steps.get_version.outputs.version }} 不存在，准备创建"
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
       - name: Remove source file
         run: |
           echo "正在删除源文件..."
-          rm mcsmanager_linux_release.tar.gz
+          rm -f mcsmanager_linux_release.tar.gz
           
       - name: Copy lib files
+        if: steps.check_release.outputs.exists == 'false'
         run: |
-          echo "正在复制 lib 文件..."
+          echo "正在复制lib文件..."
           mkdir -p mcsmanager/daemon/lib
-          cp lib/file_zip_linux_arm mcsmanager/daemon/lib/
-          cp lib/pty_linux_arm mcsmanager/daemon/lib/
+          if [ -f "lib/file_zip_linux_arm" ] && [ -f "lib/pty_linux_arm" ]; then
+            cp lib/file_zip_linux_arm mcsmanager/daemon/lib/
+            cp lib/pty_linux_arm mcsmanager/daemon/lib/
+          else
+            echo "lib目录下的必要文件不存在，终止工作流"
+            exit 1
+          fi
           
       - name: Compress MCSManager
+        if: steps.check_release.outputs.exists == 'false'
         run: |
-          echo "正在压缩 MCSManager..."
-          tar -czf mcsmanager_armv7l_release.tar.gz mcsmanager
+          echo "正在压缩MCSManager..."
+          if ! tar -czf mcsmanager_armv7l_release.tar.gz mcsmanager; then
+            echo "压缩失败，终止工作流"
+            exit 1
+          fi
           
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up GitHub CLI
+        if: steps.check_release.outputs.exists == 'false'
+        uses: cli/setup-gh@v1
         with:
-          tag_name: v${{ github.run_number }}
-          release_name: Release v${{ github.run_number }}
-          draft: false
-          prerelease: false
-      
-      - name: Upload Release Asset
-        id: upload-release-asset 
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./mcsmanager_armv7l_release.tar.gz
-          asset_name: mcsmanager_armv7l_release.tar.gz
-          asset_content_type: application/gzip
+          token: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: Commit and push changes
+      - name: Create Release and Upload Asset
+        if: steps.check_release.outputs.exists == 'false'
+        run: |
+          # 使用package.json中的版本号作为标签
+          TAG_NAME="v${{ steps.get_version.outputs.version }}"
+          RELEASE_NAME="MCSManager armv7l 版本 $TAG_NAME"
+          
+          # 创建Release
+          gh release create "$TAG_NAME" \
+            --title "$RELEASE_NAME" \
+            --notes "自动构建的MCSManager armv7l版本（基于官方最新版）" \
+            --draft=false \
+            --prerelease=false
+          
+          # 上传资产
+          gh release upload "$TAG_NAME" ./mcsmanager_armv7l_release.tar.gz \
+            --name "mcsmanager_armv7l_release.tar.gz"
+          
+      - name: Commit and push changes (if any)
+        if: steps.check_release.outputs.exists == 'false'
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add .
-          git commit -m "Auto download, extract and remove MCSManager source file"
-          git push
+          if ! git diff --quiet; then
+            git add .
+            git commit -m "自动更新: MCSManager ${{ steps.get_version.outputs.version }}"
+            git push
+          else
+            echo "没有更改需要提交"
+          fi
