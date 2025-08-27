@@ -15,8 +15,10 @@ jobs:
           submodules: true
           token: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Install jq
-        run: sudo apt-get install -y jq  # 安装JSON解析工具
+      - name: Install jq and github-cli
+        run: |
+          sudo apt-get update 
+          sudo apt-get install -y jq gh  # 同时安装jq和GitHub CLI
       
       - name: Download MCSManager
         run: |
@@ -45,8 +47,6 @@ jobs:
       - name: Check if release exists
         id: check_release
         run: |
-          # 先安装GitHub CLI
-          sudo apt-get update && sudo apt-get install -y gh
           # 检查该版本号是否已存在对应的release
           if gh release view "v${{ steps.get_version.outputs.version }}" > /dev/null 2>&1; then
             echo "版本 v${{ steps.get_version.outputs.version }} 已存在"
@@ -76,10 +76,11 @@ jobs:
             exit 1
           fi
           
-      - name: Compress MCSManager
+      - name: Compress MCSManager with correct name
         if: steps.check_release.outputs.exists == 'false'
         run: |
           echo "正在压缩MCSManager..."
+          # 直接使用想要的最终文件名进行压缩
           if ! tar -czf mcsmanager_armv7l_release.tar.gz mcsmanager; then
             echo "压缩失败，终止工作流"
             exit 1
@@ -99,9 +100,9 @@ jobs:
             --draft=false \
             --prerelease=false
           
-          # 上传资产
+          # 上传资产 - 移除--name参数，文件名由压缩时的名称决定
           gh release upload "$TAG_NAME" ./mcsmanager_armv7l_release.tar.gz \
-            --name "mcsmanager_armv7l_release.tar.gz"
+            --clobber  # 仅在文件已存在时覆盖
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
