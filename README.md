@@ -85,12 +85,6 @@ cd /opt/mcsmanager/
 
 
 
-## 版本对应表
-
-| 微调版发布时间 | 微调版版本号                                                 | 原版发布时间 | 原版版本号                                                   |
-| -------------- | ------------------------------------------------------------ | ------------ | ------------------------------------------------------------ |
-| 2025.7.7       | [Release Version 1.0.1 ](https://github.com/lirzh/Onecloud-MCSM/releases/tag/v1.0.1) | 2025.5.29    | [Release Version 10.6.1 ](https://github.com/MCSManager/MCSManager/releases/tag/v10.6.1) |
-| 2025.6.30      | [Release Version 1.0.0 ](https://github.com/lirzh/Onecloud-MCSM/releases/tag/v1.0.0) | 2025.5.29    | [Release Version 10.6.1 ](https://github.com/MCSManager/MCSManager/releases/tag/v10.6.1) |
 
 
 
