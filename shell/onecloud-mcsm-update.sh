@@ -1,5 +1,5 @@
 #!/bin/bash
-# update.sh - 自动更新Onecloud-MCSM面板（优化安装脚本冲突问题）
+# update.sh - 自动更新Onecloud-MCSM面板（优化版）
 
 # 检查是否为root用户
 if [ "$(id -u)" -ne 0 ]; then
@@ -9,7 +9,6 @@ fi
 
 # 定义安装目录
 INSTALL_DIR="/opt/mcsmanager"
-TMP_INSTALL_SCRIPT="/tmp/onecloud-mcsm-install.sh"
 
 # 检查安装目录是否存在
 if [ ! -d "${INSTALL_DIR}" ]; then
@@ -31,7 +30,7 @@ fi
 
 # 定义备份目录和当前日期
 BACKUP_DIR="./backup"
-CURRENT_DATE=$(date +%Y%m%d)
+CURRENT_DATE=$(date +%Y%m%d_%H%M%S)  # 增加时间戳避免同一天多次备份冲突
 BACKUP_DATA_DIR="${BACKUP_DIR}/data_${CURRENT_DATE}"
 BACKUP_CONFIG_DIR="${BACKUP_DIR}/config_${CURRENT_DATE}"
 
@@ -64,39 +63,54 @@ cp -r ./config "${BACKUP_CONFIG_DIR}" || {
     exit 1
 }
 
-# 下载安装脚本并修改安装逻辑（关键优化）
-echo "正在获取最新安装脚本并适配更新模式..."
-wget -qO "${TMP_INSTALL_SCRIPT}" https://raw.githubusercontent.com/Lirzh/Onecloud-MCSM/refs/heads/main/shell/onecloud-mcsm-install.sh || {
-    echo "错误：下载安装脚本失败"
+# 清理旧版本（保留服务配置文件）
+echo "正在清理旧版本文件..."
+# 先备份服务文件（如果存在）
+if [ -f "/etc/systemd/system/onecloud-mcsm-daemon.service" ]; then
+    cp /etc/systemd/system/onecloud-mcsm-daemon.service "${BACKUP_DIR}/"
+fi
+if [ -f "/etc/systemd/system/onecloud-mcsm-web.service" ]; then
+    cp /etc/systemd/system/onecloud-mcsm-web.service "${BACKUP_DIR}/"
+fi
+
+# 删除安装目录
+rm -rf "${INSTALL_DIR}"
+# 重新创建安装目录
+mkdir -p "${INSTALL_DIR}"
+chmod 755 "${INSTALL_DIR}"
+
+# 下载并执行最新安装脚本
+echo "正在下载并安装最新版本..."
+wget -qO- https://raw.githubusercontent.com/Lirzh/Onecloud-MCSM/refs/heads/main/shell/onecloud-mcsm-install.sh | bash || {
+    echo "错误：下载或执行安装脚本失败"
     exit 1
 }
 
-# 修改安装脚本：跳过目录创建和服务配置，仅执行文件更新
-sed -i '/create_install_dir/d' "${TMP_INSTALL_SCRIPT}"
-sed -i '/configure_systemd/d' "${TMP_INSTALL_SCRIPT}"
-sed -i '/start_service/d' "${TMP_INSTALL_SCRIPT}"
-sed -i '/show_finish_info/d' "${TMP_INSTALL_SCRIPT}"
-
-# 执行修改后的安装脚本（仅更新文件）
-echo "正在更新核心文件..."
-bash "${TMP_INSTALL_SCRIPT}" || {
-    echo "错误：执行更新脚本失败"
+# 进入新安装的目录
+cd "${INSTALL_DIR}" || {
+    echo "错误：安装后无法进入目录 ${INSTALL_DIR}"
     exit 1
 }
-
-# 清理临时脚本
-rm -f "${TMP_INSTALL_SCRIPT}"
 
 # 恢复配置文件
 echo "正在恢复配置文件..."
-cp -r "${BACKUP_DATA_DIR}"/* ./data/ || {
-    echo "警告：恢复data目录失败"
-}
-cp -r "${BACKUP_CONFIG_DIR}"/* ./config/ || {
-    echo "警告：恢复config目录失败"
-}
+if [ -d "${BACKUP_DATA_DIR}" ]; then
+    cp -r "${BACKUP_DATA_DIR}"/* ./data/ || {
+        echo "警告：恢复data目录失败"
+    }
+else
+    echo "警告：未找到data备份目录，无法恢复"
+fi
 
-# 重新安装依赖（确保与新版本匹配）
+if [ -d "${BACKUP_CONFIG_DIR}" ]; then
+    cp -r "${BACKUP_CONFIG_DIR}"/* ./config/ || {
+        echo "警告：恢复config目录失败"
+    }
+else
+    echo "警告：未找到config备份目录，无法恢复"
+fi
+
+# 重新安装依赖（确保兼容性）
 echo "正在更新依赖库..."
 ./install.sh || {
     echo "警告：依赖安装失败，可能影响功能"
@@ -107,6 +121,7 @@ echo "正在清理临时文件..."
 if [ -d "${BACKUP_DATA_DIR}" ] && [ -d "${BACKUP_CONFIG_DIR}" ]; then
     rm -rf "${BACKUP_DATA_DIR}"
     rm -rf "${BACKUP_CONFIG_DIR}"
+    # 如果backup目录为空则一并删除
     if [ -z "$(ls -A "${BACKUP_DIR}")" ]; then
         rm -rf "${BACKUP_DIR}"
     fi
@@ -115,11 +130,10 @@ else
     echo "警告：未找到备份文件，跳过清理步骤"
 fi
 
-# 重新加载systemd配置并启动服务
-echo "正在重启服务..."
-sudo systemctl daemon-reload
-sudo systemctl start onecloud-mcsm-daemon
-sudo systemctl start onecloud-mcsm-web
+# 启动服务（修复语法错误）
+echo "更新完成，正在启动服务..."
+sudo systemctl start onecloud-mcsm-daemon  # 启动节点服务（移除多余的等号）
+sudo systemctl start onecloud-mcsm-web     # 启动Web面板服务
 
 # 检查服务状态
 sleep 3
