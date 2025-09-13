@@ -76,6 +76,13 @@ jobs:
             exit 1
           fi
           
+      - name: Modify start scripts max-old-space-size
+        if: steps.check_release.outputs.exists == 'false'
+        run: |
+          echo "正在修改 start-daemon.sh 和 start-web.sh 的 --max-old-space-size 参数..."
+          sed -i 's/--max-old-space-size=8192/--max-old-space-size=1024/g' mcsmanager/start-daemon.sh
+          sed -i 's/--max-old-space-size=8192/--max-old-space-size=1024/g' mcsmanager/start-web.sh
+          
       - name: Compress MCSManager with correct name
         if: steps.check_release.outputs.exists == 'false'
         run: |
