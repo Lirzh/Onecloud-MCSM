@@ -2,7 +2,7 @@
 # update.sh - 自动更新Onecloud-MCSM面板
 
 # 检查是否在安装目录
-cd /opt/mcsm
+cd /opt/mcsmanger
 if [ ! -f "start-web.sh" ] || [ ! -f "start-daemon.sh" ]; then
     echo "错误：请在Onecloud-MCSM安装目录执行此脚本"
     exit 1
