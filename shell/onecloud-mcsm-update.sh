@@ -28,16 +28,7 @@ cp -r ./config ${BACKUP_CONFIG_DIR}
 
 # 下载最新版本
 echo "正在下载最新版本..."
-wget -O mcsmanager_update.tar.gz https://github.com/lirzh/Onecloud-MCSM/releases/latest/download/mcsmanager_armv7l_release.tar.gz
-
-# 解压更新
-echo "正在更新文件..."
-tar -zxf mcsmanager_update.tar.gz --overwrite
-rm -f mcsmanager_update.tar.gz  # 先删除安装包
-
-# 重新安装依赖
-echo "正在更新依赖..."
-./install.sh
+wget -qO- https://raw.githubusercontent.com/Lirzh/Onecloud-MCSM/refs/heads/main/shell/onecloud-mcsm-install.sh | bash
 
 # 恢复配置文件
 echo "正在恢复配置..."
