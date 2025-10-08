@@ -7,6 +7,8 @@ BACK_WEB="/opt/mcsm-back-web"
 DEST_DAEMON="/opt/mcsmanager/daemon/data"
 DEST_WEB="/opt/mcsmanager/web/data"
 
+systemctl stop onecloud-mcsm-daemon onecloud-mcsm-web
+
 # 1. 备份当前数据
 echo "正在备份 daemon/data..."
 cp -r /opt/mcsmanager/daemon/data "$BACK_DAEMON"
@@ -23,12 +25,16 @@ wget -qO- https://raw.githubusercontent.com/Lirzh/Onecloud-MCSM/refs/heads/main/
 
 # 4. 恢复数据（先清空目标再恢复）
 echo "恢复 daemon/data..."
+systemctl stop onecloud-mcsm-daemon
 rm -rf "$DEST_DAEMON"
 mv "$BACK_DAEMON" "$DEST_DAEMON"
+systemctl start onecloud-mcsm-daemon
 
 echo "恢复 web/data..."
+systemctl stop onecloud-mcsm-web
 rm -rf "$DEST_WEB"
 mv "$BACK_WEB" "$DEST_WEB"
+systemctl start onecloud-mcsm-web
 
 # 5. 清理残留备份
 echo "清理临时备份文件..."
