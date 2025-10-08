@@ -97,7 +97,7 @@ create_install_dir() {
 install_service() {
     log_info "正在下载 Onecloud-MCSM..."
     
-    cd /opt/mcsmanager/
+    cd /opt/
     
     # 下载 MCSManager
     wget https://github.com/lirzh/Onecloud-MCSM/releases/latest/download/mcsmanager_armv7l_release.tar.gz
