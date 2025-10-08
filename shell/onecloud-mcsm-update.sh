@@ -32,6 +32,6 @@ mv "$BACK_WEB" "$DEST_WEB"
 
 # 5. 清理残留备份
 echo "清理临时备份文件..."
-# rm -rf "$BACK_DAEMON" "$BACK_WEB"
+rm -rf "$BACK_DAEMON" "$BACK_WEB"
 
 echo "✅ 完成！数据已恢复到新安装中。"
