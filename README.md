@@ -31,6 +31,14 @@ wget -qO- https://raw.githubusercontent.com/Lirzh/Onecloud-MCSM/refs/heads/main/
 
 然后......没有其他操作了，惊不惊喜！
 
+### 脚本更新（推荐）：
+
+```
+wget -qO- https://raw.githubusercontent.com/Lirzh/Onecloud-MCSM/refs/heads/main/shell/onecloud-mcsm-update.sh | bash
+```
+
+然后......没有其他操作了，惊不惊喜！
+
 ### 手动安装（麻烦，不推荐）：
 
 **环境配置：**
