@@ -23,18 +23,10 @@
 
 ## 使用方法
 
-### 脚本安装（推荐）：
+### 脚本安装/更新（推荐）：
 
 ```
 wget -qO- https://raw.githubusercontent.com/Lirzh/Onecloud-MCSM/refs/heads/main/shell/onecloud-mcsm-install.sh | bash
-```
-
-然后......没有其他操作了，惊不惊喜！
-
-### 脚本更新（推荐）：
-
-```
-wget -qO- https://raw.githubusercontent.com/Lirzh/Onecloud-MCSM/refs/heads/main/shell/onecloud-mcsm-update.sh | bash
 ```
 
 然后......没有其他操作了，惊不惊喜！

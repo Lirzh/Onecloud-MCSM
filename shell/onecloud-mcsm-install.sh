@@ -1,5 +1,5 @@
 #!/bin/bash
-# Onecloud-MCSM 一键安装脚本
+# Onecloud-MCSM 一键安装/更新脚本
 
 # 定义颜色常量
 RED='\033[0;31m'
@@ -159,7 +159,7 @@ start_service() {
 # 显示安装完成信息
 show_finish_info() {
     log_info "========================================="
-    log_info "${GREEN}Onecloud-MCSM 安装完成！${NC}"
+    log_info "${GREEN}Onecloud-MCSM 安装/更新完成！${NC}"
     log_info "========================================="
     log_info "服务管理命令:"
     log_info "  启动节点服务: systemctl start onecloud-mcsm-daemon"
@@ -176,19 +176,96 @@ show_finish_info() {
     log_info "========================================="
 }
 
-# 主函数
-main() {
-    echo -e "${GREEN}欢迎使用 Onecloud-MCSM 一键安装脚本！${NC}"
-    echo "========================================="
+# 备份数据
+backup_data() {
+    # 备份路径
+    BACK_DAEMON="/opt/mcsm-back-daemon"
+    BACK_WEB="/opt/mcsm-back-web"
+    DEST_DAEMON="/opt/mcsmanager/daemon/data"
+    DEST_WEB="/opt/mcsmanager/web/data"
     
-    check_root
-    check_system
+    systemctl stop onecloud-mcsm-daemon onecloud-mcsm-web
+    
+    # 1. 备份当前数据
+    log_info "正在备份 daemon/data..."
+    cp -r /opt/mcsmanager/daemon/data "$BACK_DAEMON"
+    log_info "正在备份 web/data..."
+    cp -r /opt/mcsmanager/web/data "$BACK_WEB"
+}
+
+# 恢复数据
+restore_data() {
+    # 备份路径
+    BACK_DAEMON="/opt/mcsm-back-daemon"
+    BACK_WEB="/opt/mcsm-back-web"
+    DEST_DAEMON="/opt/mcsmanager/daemon/data"
+    DEST_WEB="/opt/mcsmanager/web/data"
+    
+    # 4. 恢复数据（先清空目标再恢复）
+    log_info "恢复 daemon/data..."
+    systemctl stop onecloud-mcsm-daemon
+    rm -rf "$DEST_DAEMON"
+    mv "$BACK_DAEMON" "$DEST_DAEMON"
+    systemctl start onecloud-mcsm-daemon
+    
+    log_info "恢复 web/data..."
+    systemctl stop onecloud-mcsm-web
+    rm -rf "$DEST_WEB"
+    mv "$BACK_WEB" "$DEST_WEB"
+    systemctl start onecloud-mcsm-web
+    
+    # 5. 清理残留备份
+    log_info "清理临时备份文件..."
+    rm -rf "$BACK_DAEMON" "$BACK_WEB"
+    
+    log_info "✅ 完成！数据已恢复到新安装中。"
+}
+
+# 更新功能
+update_mcsm() {
+    log_info "检测到已安装 Onecloud-MCSM，执行更新操作..."
+    
+    # 备份数据
+    backup_data
+    
+    # 2. 移除旧安装
+    log_info "移除旧版 MCSManager..."
+    rm -rf /opt/mcsmanager
+    
+    # 3. 安装新版
+    log_info "正在安装新版 MCSManager..."
     install_dependencies
     create_install_dir
     install_service
     configure_systemd
     start_service
+    
+    # 恢复数据
+    restore_data
+    
     show_finish_info
+}
+
+# 主函数
+main() {
+    echo -e "${GREEN}欢迎使用 Onecloud-MCSM 一键安装/更新脚本！${NC}"
+    echo "========================================="
+    
+    check_root
+    check_system
+    
+    # 检查是否已安装
+    if [ -d "/opt/mcsmanager" ]; then
+        update_mcsm
+    else
+        # 全新安装
+        install_dependencies
+        create_install_dir
+        install_service
+        configure_systemd
+        start_service
+        show_finish_info
+    fi
 }
 
 # 执行主函数
