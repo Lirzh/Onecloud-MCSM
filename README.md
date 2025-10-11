@@ -18,7 +18,7 @@
 - **特别说明**：二次开发已征得 [原作者：yumao233 (Yumao)](https://github.com/yumao233)  的同意
 - **内容概括**：适用于ARMHF设备的MCSM面板的微调版本
 - **系统要求**：Linux ARMHF 设备（如树莓派等）
-- **开源地址**：https://github.com/lirzh/Onecloud-MCSM
+- **开源地址**：[armhf-MCSManager](https://github.com/lirzh/armhf-MCSManager)
 - **开源协议**：MIT
 - **协议**：Apache-2.0
 - **最后更新**：每日自动构建
@@ -86,14 +86,9 @@ cd /opt/mcsmanager/
 # 默认需要开放的端口：23333 和 24444
 ```
 
-
-
-
-
-
 ## 反馈问题和 Bug
 
-如果你在使用过程中遇到问题或发现 Bug，可以前往 [本项目的 Issues 页面](https://github.com/lirzh/Onecloud-Mcsm/issues) 或是 [MCSM项目的 Issues 页面](https://github.com/MCSManager/MCSManager/issues) 提交反馈，我们 或 MCSM团队 会处理。
+如果你在使用过程中遇到问题或发现 Bug，可以前往 [本项目的 Issues 页面](https://github.com/lirzh/armhf-MCSManager/issues) 或是 [MCSM项目的 Issues 页面](https://github.com/MCSManager/MCSManager/issues) 提交反馈，我们 或 MCSM团队 会处理。
 
 ## 鸣谢
 
