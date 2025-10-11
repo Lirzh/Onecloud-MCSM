@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  mcsm-daemon:
+    build:
+      context: .
+      dockerfile: daemon.Dockerfile
+    container_name: mcsm-daemon
+    ports:
+      - "24444:24444"
+    volumes:
+      - ./data/daemon:/opt/mcsmanager/daemon/data
+    networks:
+      - mcsm-network
+    restart: unless-stopped
+
+  mcsm-web:
+    build:
+      context: .
+      dockerfile: web.Dockerfile
+    container_name: mcsm-web
+    ports:
+      - "23333:23333"
+    volumes:
+      - ./data/web:/opt/mcsmanager/web/data
+    networks:
+      - mcsm-network
+    depends_on:
+      - mcsm-daemon
+    restart: unless-stopped
+
+networks:
+  mcsm-network:
+    driver: bridge

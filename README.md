@@ -21,7 +21,7 @@
 - **开源地址**：[armhf-MCSManager](https://github.com/lirzh/armhf-MCSManager)
 - **开源协议**：MIT
 - **协议**：Apache-2.0
-- **最后更新**：每日自动构建
+- **最后更新**：自动同步更新
 - **关于AI**：该微调内容由AI告知，人工修改，机器编译。脚本由AI据MCSM官方脚本改写，人工审核，如有错误请联系作者。
 
 ## 使用方法
