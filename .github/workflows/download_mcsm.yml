@@ -15,26 +15,20 @@ jobs:
           submodules: true
           token: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Install jq and github-cli
+      - name: Install dependencies
         run: |
           sudo apt-get update 
-          sudo apt-get install -y jq gh  # 同时安装jq和GitHub CLI
+          sudo apt-get install -y jq gh
       
       - name: Download MCSManager
         run: |
           echo "正在下载 MCSManager 最新 Linux 版本..."
-          if ! wget -O mcsmanager_linux_release.tar.gz https://github.com/MCSManager/MCSManager/releases/latest/download/mcsmanager_linux_release.tar.gz; then
-            echo "下载失败，终止工作流"
-            exit 1
-          fi
+          wget -O mcsmanager_linux_release.tar.gz https://github.com/MCSManager/MCSManager/releases/latest/download/mcsmanager_linux_release.tar.gz
           
       - name: Extract MCSManager
         run: |
           echo "正在解压..."
-          if ! tar -zxf mcsmanager_linux_release.tar.gz; then
-            echo "解压失败，终止工作流"
-            exit 1
-          fi
+          tar -zxf mcsmanager_linux_release.tar.gz
           
       - name: Get version from package.json
         id: get_version
@@ -47,7 +41,7 @@ jobs:
       - name: Check if release exists
         id: check_release
         run: |
-          # 检查该版本号是否已存在对应的release
+          # 检查该版本号是否已存在对应的release（包括草稿和预发布）
           if gh release view "v${{ steps.get_version.outputs.version }}" > /dev/null 2>&1; then
             echo "版本 v${{ steps.get_version.outputs.version }} 已存在"
             echo "exists=true" >> $GITHUB_OUTPUT
@@ -58,14 +52,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: Remove source file
-        run: |
-          echo "正在删除源文件..."
-          rm -f mcsmanager_linux_release.tar.gz
-          
-      - name: Copy lib files
+      - name: Clean up and prepare files
         if: steps.check_release.outputs.exists == 'false'
         run: |
+          echo "正在准备文件..."
+          rm -f mcsmanager_linux_release.tar.gz
+          
+          # 复制lib文件
           echo "正在复制lib文件..."
           mkdir -p mcsmanager/daemon/lib
           if [ -f "lib/file_zip_linux_arm" ] && [ -f "lib/pty_linux_arm" ]; then
@@ -76,22 +69,14 @@ jobs:
             exit 1
           fi
           
-      - name: Modify start scripts max-old-space-size
-        if: steps.check_release.outputs.exists == 'false'
-        run: |
+          # 修改启动脚本
           echo "正在修改 start-daemon.sh 和 start-web.sh 的 --max-old-space-size 参数..."
           sed -i 's/--max-old-space-size=8192/--max-old-space-size=1024/g' mcsmanager/start-daemon.sh
           sed -i 's/--max-old-space-size=8192/--max-old-space-size=1024/g' mcsmanager/start-web.sh
           
-      - name: Compress MCSManager with correct name
-        if: steps.check_release.outputs.exists == 'false'
-        run: |
+          # 压缩文件
           echo "正在压缩MCSManager..."
-          # 直接使用想要的最终文件名进行压缩
-          if ! tar -czf mcsmanager_armv7l_release.tar.gz mcsmanager; then
-            echo "压缩失败，终止工作流"
-            exit 1
-          fi
+          tar -czf mcsmanager_armv7l_release.tar.gz mcsmanager
           
       - name: Create Release and Upload Asset
         if: steps.check_release.outputs.exists == 'false'
@@ -107,13 +92,12 @@ jobs:
             --draft=false \
             --prerelease=false
           
-          # 上传资产 - 移除--name参数，文件名由压缩时的名称决定
-          gh release upload "$TAG_NAME" ./mcsmanager_armv7l_release.tar.gz \
-            --clobber  # 仅在文件已存在时覆盖
+          # 上传资产
+          gh release upload "$TAG_NAME" ./mcsmanager_armv7l_release.tar.gz --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: Commit and push changes (if any)
+      - name: Commit and push changes
         if: steps.check_release.outputs.exists == 'false'
         run: |
           git config --global user.name 'github-actions[bot]'
@@ -125,3 +109,10 @@ jobs:
           else
             echo "没有更改需要提交"
           fi
+          
+      - name: Clean up temporary files
+        run: |
+          echo "正在清理临时文件和目录..."
+          rm -rf mcsmanager
+          rm -f mcsmanager_armv7l_release.tar.gz
+          rm -f mcsmanager_linux_release.tar.gz
