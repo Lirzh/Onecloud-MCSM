@@ -53,7 +53,7 @@ jobs:
           platforms: linux/arm/v7
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:daemon-latest
+            ghcr.io/${{ github.repository_owner }}/armhf-mcsmanager-daemon:latest
             ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       
@@ -65,6 +65,6 @@ jobs:
           platforms: linux/arm/v7
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:web-latest
+            ghcr.io/${{ github.repository_owner }}/armhf-mcsmanager-web:latest
             ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
