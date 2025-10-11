@@ -1,5 +1,5 @@
-# Onecloud-MCSM
-适用于玩客云的mcsm微调版本
+# armhf-MCSManager
+适用于armhf的MCSM面板的微调版本
 
 ## 关于二次开发
 
@@ -11,12 +11,15 @@
 
 ## 简介
 
-- **名字**：Onecloud-MCSM
+- **名字**：armhf-MCSManager
 - **原作者**：[MCSManager](https://github.com/MCSManager)
 - **原仓库**：[Github - MCSManager](https://github.com/MCSManager/MCSManager)
 - **二次开发者**：[Lirzh](https://github.com/lirzh)
 - **特别说明**：二次开发已征得 [原作者：yumao233 (Yumao)](https://github.com/yumao233)  的同意
-- **内容概括**：适用于玩客云的MCSM面板的微调版本
+- **内容概括**：适用于ARMHF设备的MCSM面板的微调版本
+- **系统要求**：Linux ARMHF 设备（如树莓派等）
+- **开源地址**：https://github.com/lirzh/Onecloud-MCSM
+- **开源协议**：MIT
 - **协议**：Apache-2.0
 - **最后更新**：每日自动构建
 - **关于AI**：该微调内容由AI告知，人工修改，机器编译。脚本由AI据MCSM官方脚本改写，人工审核，如有错误请联系作者。
@@ -26,7 +29,7 @@
 ### 脚本安装/更新（推荐）：
 
 ```
-wget -qO- https://raw.githubusercontent.com/Lirzh/Onecloud-MCSM/refs/heads/main/shell/onecloud-mcsm-install.sh | bash
+wget -qO- https://raw.githubusercontent.com/Lirzh/armhf-MCSManager/refs/heads/main/shell/armhf-mcsm-install.sh | bash
 ```
 
 然后......没有其他操作了，惊不惊喜！
@@ -44,8 +47,8 @@ wget -qO- https://raw.githubusercontent.com/Lirzh/Onecloud-MCSM/refs/heads/main/
 mkdir /opt/mcsmanager/
 cd /opt/mcsmanager/
 
-# 下载 MCSManager（如果无法下载可以先科学上网下载再上传到服务器）
-wget https://github.com/lirzh/Onecloud-MCSM/releases/latest/download/mcsmanager_armv7l_release.tar.gz
+# 下载 armhf-MCSManager（如果无法下载可以先科学上网下载再上传到服务器）
+wget https://github.com/lirzh/armhf-MCSManager/releases/latest/download/mcsmanager_armv7l_release.tar.gz
 
 # 解压到安装目录
 tar -zxf mcsmanager_armv7l_release.tar.gz
@@ -65,7 +68,7 @@ cd /opt/mcsmanager/
 
 ###### 使用 systemd 管理服务（推荐）：
 
-请看[Onecloud-MCSM/shell at main · Lirzh/Onecloud-MCSM](https://github.com/Lirzh/Onecloud-MCSM/tree/main/shell)
+请看[armhf-MCSManager/shell at main · Lirzh/armhf-MCSManager](https://github.com/Lirzh/armhf-MCSManager/tree/main/shell)
 
 ###### 手动运行（不推荐）：
 

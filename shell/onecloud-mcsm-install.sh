@@ -1,5 +1,5 @@
 #!/bin/bash
-# Onecloud-MCSM 一键安装/更新脚本
+# armhf-MCSM 一键安装/更新脚本
 
 # 定义颜色常量
 RED='\033[0;31m'
@@ -95,12 +95,12 @@ create_install_dir() {
 
 # 下载并安装服务
 install_service() {
-    log_info "正在下载 Onecloud-MCSM..."
+    log_info "正在下载 armhf-MCSManager..."
     
     cd /opt/
     
     # 下载 MCSManager
-    wget https://github.com/lirzh/Onecloud-MCSM/releases/latest/download/mcsmanager_armv7l_release.tar.gz
+    wget https://github.com/lirzh/armhf-MCSManager/releases/latest/download/mcsmanager_armv7l_release.tar.gz
     
     if [ $? -ne 0 ]; then
         log_error "下载失败，请检查网络连接或 URL 是否正确"
@@ -112,7 +112,7 @@ install_service() {
     tar -zxf mcsmanager_armv7l_release.tar.gz
     rm mcsmanager_armv7l_release.tar.gz
     
-    log_info "Onecloud-MCSM 已成功安装到 /opt/mcsmanager/"
+    log_info "armhf-MCSManager 已成功安装到 /opt/mcsmanager/"
 }
 
 # 配置 systemd 服务
@@ -120,12 +120,12 @@ configure_systemd() {
     log_info "正在配置 systemd 服务..."
     
     # 创建节点服务文件
-    log_info "下载 onecloud-mcsm-daemon.service..."
-    wget -O /etc/systemd/system/onecloud-mcsm-daemon.service https://raw.githubusercontent.com/Lirzh/Onecloud-MCSM/refs/heads/main/shell/onecloud-mcsm-daemon.service
+    log_info "下载 armhf-mcsm-daemon.service..."
+    wget -O /etc/systemd/system/armhf-mcsm-daemon.service https://raw.githubusercontent.com/Lirzh/armhf-MCSManager/refs/heads/main/shell/armhf-mcsm-daemon.service
     
     # 创建 Web 面板服务文件
-    log_info "下载 onecloud-mcsm-web.service..."
-    wget -O /etc/systemd/system/onecloud-mcsm-web.service https://raw.githubusercontent.com/Lirzh/Onecloud-MCSM/refs/heads/main/shell/onecloud-mcsm-web.service
+    log_info "下载 armhf-mcsm-web.service..."
+    wget -O /etc/systemd/system/armhf-mcsm-web.service https://raw.githubusercontent.com/Lirzh/armhf-MCSManager/refs/heads/main/shell/armhf-mcsm-web.service
     
     # 重新加载 systemd 配置
     systemctl daemon-reload
@@ -133,25 +133,25 @@ configure_systemd() {
 
 # 启动服务
 start_service() {
-    log_info "正在启动 Onecloud-MCSM 服务..."
+    log_info "正在启动 armhf-MCSManager 服务..."
     
     # 启动节点服务
-    systemctl start onecloud-mcsm-daemon
+    systemctl start armhf-mcsm-daemon
     if [ $? -ne 0 ]; then
         log_error "节点服务启动失败"
     else
         # 设置节点服务开机自启
-        systemctl enable onecloud-mcsm-daemon
+        systemctl enable armhf-mcsm-daemon
         log_info "节点服务已启动并设置为开机自启"
     fi
     
     # 启动 Web 面板服务
-    systemctl start onecloud-mcsm-web
+    systemctl start armhf-mcsm-web
     if [ $? -ne 0 ]; then
         log_error "Web 面板服务启动失败"
     else
         # 设置 Web 面板服务开机自启
-        systemctl enable onecloud-mcsm-web
+        systemctl enable armhf-mcsm-web
         log_info "Web 面板服务已启动并设置为开机自启"
     fi
 }
@@ -159,18 +159,18 @@ start_service() {
 # 显示安装完成信息
 show_finish_info() {
     log_info "========================================="
-    log_info "${GREEN}Onecloud-MCSM 安装/更新完成！${NC}"
+    log_info "${GREEN}armhf-MCSManager 安装/更新完成！${NC}"
     log_info "========================================="
     log_info "服务管理命令:"
-    log_info "  启动节点服务: systemctl start onecloud-mcsm-daemon"
-    log_info "  停止节点服务: systemctl stop onecloud-mcsm-daemon"
-    log_info "  重启节点服务: systemctl restart onecloud-mcsm-daemon"
-    log_info "  查看节点服务状态: systemctl status onecloud-mcsm-daemon"
+    log_info "  启动节点服务: systemctl start armhf-mcsm-daemon"
+    log_info "  停止节点服务: systemctl stop armhf-mcsm-daemon"
+    log_info "  重启节点服务: systemctl restart armhf-mcsm-daemon"
+    log_info "  查看节点服务状态: systemctl status armhf-mcsm-daemon"
     log_info ""
-    log_info "  启动 Web 面板: systemctl start onecloud-mcsm-web"
-    log_info "  停止 Web 面板: systemctl stop onecloud-mcsm-web"
-    log_info "  重启 Web 面板: systemctl restart onecloud-mcsm-web"
-    log_info "  查看 Web 面板状态: systemctl status onecloud-mcsm-web"
+    log_info "  启动 Web 面板: systemctl start armhf-mcsm-web"
+    log_info "  停止 Web 面板: systemctl stop armhf-mcsm-web"
+    log_info "  重启 Web 面板: systemctl restart armhf-mcsm-web"
+    log_info "  查看 Web 面板状态: systemctl status armhf-mcsm-web"
     log_info ""
     log_info "访问地址: http://服务器IP:23333"
     log_info "========================================="
@@ -184,7 +184,7 @@ backup_data() {
     DEST_DAEMON="/opt/mcsmanager/daemon/data"
     DEST_WEB="/opt/mcsmanager/web/data"
     
-    systemctl stop onecloud-mcsm-daemon onecloud-mcsm-web
+    systemctl stop armhf-mcsm-daemon armhf-mcsm-web
     
     # 1. 备份当前数据
     log_info "正在备份 daemon/data..."
@@ -203,16 +203,16 @@ restore_data() {
     
     # 4. 恢复数据（先清空目标再恢复）
     log_info "恢复 daemon/data..."
-    systemctl stop onecloud-mcsm-daemon
+    systemctl stop armhf-mcsm-daemon
     rm -rf "$DEST_DAEMON"
     mv "$BACK_DAEMON" "$DEST_DAEMON"
-    systemctl start onecloud-mcsm-daemon
+    systemctl start armhf-mcsm-daemon
     
     log_info "恢复 web/data..."
-    systemctl stop onecloud-mcsm-web
+    systemctl stop armhf-mcsm-web
     rm -rf "$DEST_WEB"
     mv "$BACK_WEB" "$DEST_WEB"
-    systemctl start onecloud-mcsm-web
+    systemctl start armhf-mcsm-web
     
     # 5. 清理残留备份
     log_info "清理临时备份文件..."
@@ -223,17 +223,17 @@ restore_data() {
 
 # 更新功能
 update_mcsm() {
-    log_info "检测到已安装 Onecloud-MCSM，执行更新操作..."
+    log_info "检测到已安装 armhf-MCSManager，执行更新操作..."
     
     # 备份数据
     backup_data
     
     # 2. 移除旧安装
-    log_info "移除旧版 MCSManager..."
+    log_info "移除旧版 armhf-MCSManager..."
     rm -rf /opt/mcsmanager
     
     # 3. 安装新版
-    log_info "正在安装新版 MCSManager..."
+    log_info "正在安装新版 armhf-MCSManager..."
     install_dependencies
     create_install_dir
     install_service
@@ -248,7 +248,7 @@ update_mcsm() {
 
 # 主函数
 main() {
-    echo -e "${GREEN}欢迎使用 Onecloud-MCSM 一键安装/更新脚本！${NC}"
+    echo -e "${GREEN}欢迎使用 armhf-MCSManager 一键安装/更新脚本！${NC}"
     echo "========================================="
     
     check_root

@@ -1,5 +1,5 @@
 [Unit]
-Description=Onecloud-MCSM Node Daemon
+Description=armhf-MCSM Node Daemon
 After=network.target
 
 [Service]

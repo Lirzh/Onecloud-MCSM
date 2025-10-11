@@ -1,22 +1,22 @@
-# Onecloud-MCSM
+# armhf-MCSManager
 
-适用于玩客云的mcsm微调版本
+适用于armhf的MCSM面板的微调版本
 
 ### 这里存放要用的脚本
 
 #### 使用 systemd 管理服务
 
-为了方便管理，可以使用 `systemd` 来启动和管理 Onecloud-MCSM 的节点服务和 Web 面板服务。
+为了方便管理，可以使用 `systemd` 来启动和管理 armhf-MCSManager 的节点服务和 Web 面板服务。
 
 ##### 创建服务文件
 
 在 `/etc/systemd/system` 目录下创建以下两个服务文件：
 
-**onecloud-mcsm-daemon.service：**
+**armhf-mcsm-daemon.service：**
 
 ```ini
 [Unit]
-Description=Onecloud-MCSM Node Daemon
+Description=armhf-MCSManager Node Daemon
 After=network.target
 
 [Service]
@@ -30,12 +30,12 @@ RestartSec=5
 WantedBy=multi-user.target
 ```
 
-**onecloud-mcsm-web.service：**
+**armhf-mcsm-web.service：**
 
 ```ini
 [Unit]
-Description=Onecloud-MCSM Web Panel
-After=network.target onecloud-mcsm-daemon.service
+Description=armhf-MCSManager Web Panel
+After=network.target armhf-mcsm-daemon.service
 
 [Service]
 Type=simple
@@ -58,20 +58,20 @@ sudo systemctl daemon-reload
 
 ```bash
 # 启动节点服务
-sudo systemctl start onecloud-mcsm-daemon
+sudo systemctl start armhf-mcsm-daemon
 # 设置节点服务开机自启
-sudo systemctl enable onecloud-mcsm-daemon
+sudo systemctl enable armhf-mcsm-daemon
 
 # 启动 Web 面板服务
-sudo systemctl start onecloud-mcsm-web
+sudo systemctl start armhf-mcsm-web
 # 设置 Web 面板服务开机自启
-sudo systemctl enable onecloud-mcsm-web
+sudo systemctl enable armhf-mcsm-web
 ```
 
 ##### 检查服务状态
 
 ```bash
-sudo systemctl status onecloud-mcsm-daemon
-sudo systemctl status onecloud-mcsm-web
+sudo systemctl status armhf-mcsm-daemon
+sudo systemctl status armhf-mcsm-web
 ```
 

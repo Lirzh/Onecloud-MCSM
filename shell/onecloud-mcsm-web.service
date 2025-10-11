@@ -1,6 +1,6 @@
 [Unit]
-Description=Onecloud-MCSM Web Panel
-After=network.target onecloud-mcsm-daemon.service
+Description=armhf-MCSM Web Panel
+After=network.target armhf-mcsm-daemon.service
 
 [Service]
 Type=simple
