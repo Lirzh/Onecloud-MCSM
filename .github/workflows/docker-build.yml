@@ -15,6 +15,9 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,17 +25,20 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       
-      - name: Login to DockerHub
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: lirzh/armhf-mcsm
+          images: |
+            ghcr.io/${{ github.repository_owner }}/armhf-mcsm-daemon
+            ghcr.io/${{ github.repository_owner }}/armhf-mcsm-web
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -47,7 +53,9 @@ jobs:
           file: ./daemon.Dockerfile
           platforms: linux/arm/v7
           push: true
-          tags: ${{ steps.meta.outputs.tags }},lirzh/armhf-mcsm:daemon
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/armhf-mcsm-daemon:latest
+            ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       
       - name: Build and push web image
@@ -57,5 +65,7 @@ jobs:
           file: ./web.Dockerfile
           platforms: linux/arm/v7
           push: true
-          tags: ${{ steps.meta.outputs.tags }},lirzh/armhf-mcsm:web
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/armhf-mcsm-web:latest
+            ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
