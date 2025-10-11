@@ -109,10 +109,3 @@ jobs:
           else
             echo "没有更改需要提交"
           fi
-          
-      - name: Clean up temporary files
-        run: |
-          echo "正在清理临时文件和目录..."
-          rm -rf mcsmanager
-          rm -f mcsmanager_armv7l_release.tar.gz
-          rm -f mcsmanager_linux_release.tar.gz
